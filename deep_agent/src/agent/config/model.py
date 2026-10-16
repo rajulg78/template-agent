@@ -12,6 +12,7 @@ from typing import Any
 from pydantic import BaseModel, model_validator
 
 from deep_agent.src.agent.llm import CLAUDE_MODELS, GEMINI_MODELS
+from deep_agent.src.settings import settings
 
 
 class Provider(str, Enum):
@@ -57,8 +58,6 @@ def infer_provider(model_name: str) -> Provider:
         return Provider.VERTEX
     if model_name.lower().startswith("gpt-"):
         return Provider.OPENAI
-    from deep_agent.src.settings import settings
-
     if getattr(settings, "LLM_PROVIDER", None) == "models_corp":
         return Provider.MODELS_CORP
     return Provider.MAAS
