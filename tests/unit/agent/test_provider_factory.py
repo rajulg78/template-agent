@@ -43,8 +43,14 @@ class TestInferProvider:
     def test_models_corp_provider_via_llm_provider_env(self):
         with patch("deep_agent.src.agent.config.model.settings") as mock_settings:
             mock_settings.LLM_PROVIDER = "models_corp"
-            assert infer_provider("mistralai/Mistral-7B-Instruct-v0.3") == Provider.MODELS_CORP
-            assert infer_provider("ibm-granite/granite-3.3-8b-instruct") == Provider.MODELS_CORP
+            assert (
+                infer_provider("mistralai/Mistral-7B-Instruct-v0.3")
+                == Provider.MODELS_CORP
+            )
+            assert (
+                infer_provider("ibm-granite/granite-3.3-8b-instruct")
+                == Provider.MODELS_CORP
+            )
 
     def test_unknown_model_without_llm_provider_env_infers_maas(self):
         with patch("deep_agent.src.agent.config.model.settings") as mock_settings:
@@ -216,10 +222,11 @@ class TestCreateModelFromSpec:
         assert result is mock_model
         assert mock_create.call_args[0][0] == Provider.MAAS
 
-
     def test_routes_models_corp_provider(self):
         mock_model = MagicMock()
-        spec = ModelSpec(provider=Provider.MODELS_CORP, name="mistralai/Mistral-7B-Instruct-v0.3")
+        spec = ModelSpec(
+            provider=Provider.MODELS_CORP, name="mistralai/Mistral-7B-Instruct-v0.3"
+        )
 
         with patch(
             "deep_agent.src.agent.provider_factory._create_by_provider",
@@ -231,9 +238,16 @@ class TestCreateModelFromSpec:
         assert mock_create.call_args[0][0] == Provider.MODELS_CORP
 
     def test_models_corp_does_not_prepend_data_prefix(self):
-        with patch("deep_agent.src.agent.provider_factory._create_vllm_model") as mock_vllm:
+        with patch(
+            "deep_agent.src.agent.provider_factory._create_vllm_model"
+        ) as mock_vllm:
             mock_vllm.return_value = MagicMock()
-            _create_by_provider(Provider.MODELS_CORP, "mistralai/Mistral-7B-Instruct-v0.3", temperature=0.0, max_output_tokens=8192)
+            _create_by_provider(
+                Provider.MODELS_CORP,
+                "mistralai/Mistral-7B-Instruct-v0.3",
+                temperature=0.0,
+                max_output_tokens=8192,
+            )
 
         called_model_name = mock_vllm.call_args[0][0]
         assert not called_model_name.startswith("/data/")
