@@ -20,6 +20,7 @@ class Provider(str, Enum):
     VERTEX = "vertex"
     OPENAI = "openai"
     MAAS = "maas"  # Model as a Service (VLLM)
+    MODELS_CORP = "models_corp"  # models.corp / APIcast-fronted vLLM
 
 
 class ModelSpec(BaseModel):
@@ -49,12 +50,17 @@ def infer_provider(model_name: str) -> Provider:
     Inference logic:
     - Known Gemini/Claude models → VERTEX
     - GPT models (gpt-*, case-insensitive) → OPENAI
+    - LLM_PROVIDER env var == "models_corp" → MODELS_CORP (models.corp / APIcast-fronted vLLM)
     - All other models → MAAS (VLLM for custom models)
     """
     if model_name in GEMINI_MODELS or model_name in CLAUDE_MODELS:
         return Provider.VERTEX
     if model_name.lower().startswith("gpt-"):
         return Provider.OPENAI
+    from deep_agent.src.settings import settings
+
+    if getattr(settings, "LLM_PROVIDER", None) == "models_corp":
+        return Provider.MODELS_CORP
     return Provider.MAAS
 
 
